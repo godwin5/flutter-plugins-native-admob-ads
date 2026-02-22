@@ -11,7 +11,7 @@ class MethodChannelFlutterNativeAdmobAds extends FlutterNativeAdmobAdsPlatform {
   final methodChannel = const MethodChannel('flutter_native_admob_ads');
 
   @override
-  Future<List<NativeAd>> loadNativeAd(NativeAdOptions options) async {
+  Future<List<FlutterNativeAd>> loadNativeAd(FlutterNativeAdOptions options) async {
     final List<dynamic>? result = await methodChannel.invokeMethod<List<dynamic>>(
       'loadNativeAd',
       options.toMap(),
@@ -19,7 +19,7 @@ class MethodChannelFlutterNativeAdmobAds extends FlutterNativeAdmobAdsPlatform {
 
     if (result == null) return [];
 
-    return result.map((e) => NativeAd.fromMap(Map<String, dynamic>.from(e as Map))).toList();
+    return result.map((e) => FlutterNativeAd.fromMap(Map<String, dynamic>.from(e as Map))).toList();
   }
 
   @override

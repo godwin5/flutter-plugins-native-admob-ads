@@ -29,7 +29,7 @@ class NativeAdDemo extends StatefulWidget {
 
 class _NativeAdDemoState extends State<NativeAdDemo> {
   final _admobPlugin = FlutterNativeAdmobAds();
-  NativeAd? _loadedAd;
+  FlutterNativeAd? _loadedAd;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -43,7 +43,7 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
 
     try {
       final ads = await _admobPlugin.loadNativeAd(
-        NativeAdOptions(
+        FlutterNativeAdOptions(
           adId: 'ca-app-pub-3940256099942544/2247696110', // Android Test ID
           isTesting: true,
           adsCount: 1,
@@ -115,7 +115,7 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
   }
 
   /// Builds a 100% custom Flutter UI for the native ad data
-  Widget _buildNativeAdCard(NativeAd ad) {
+  Widget _buildNativeAdCard(FlutterNativeAd ad) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

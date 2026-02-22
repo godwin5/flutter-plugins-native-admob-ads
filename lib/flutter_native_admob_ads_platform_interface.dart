@@ -24,7 +24,7 @@ abstract class FlutterNativeAdmobAdsPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<List<NativeAd>> loadNativeAd(NativeAdOptions options) {
+  Future<List<FlutterNativeAd>> loadNativeAd(FlutterNativeAdOptions options) {
     throw UnimplementedError('loadNativeAd() has not been implemented.');
   }
 

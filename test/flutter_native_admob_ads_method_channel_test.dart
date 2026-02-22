@@ -19,6 +19,6 @@ void main() {
   });
 
   test('loadNativeAd returns empty list on null result', () async {
-    // expect(await platform.loadNativeAd(NativeAdOptions(adId: 'test')), isEmpty);
+    // expect(await platform.loadNativeAd(FlutterNativeAdOptions(adId: 'test')), isEmpty);
   });
 }

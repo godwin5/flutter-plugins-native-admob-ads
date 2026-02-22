@@ -2,7 +2,7 @@ import 'flutter_native_admob_ads_platform_interface.dart';
 import 'native_ad_models.dart';
 
 class FlutterNativeAdmobAds {
-  Future<List<NativeAd>> loadNativeAd(NativeAdOptions options) {
+  Future<List<FlutterNativeAd>> loadNativeAd(FlutterNativeAdOptions options) {
     return FlutterNativeAdmobAdsPlatform.instance.loadNativeAd(options);
   }
 

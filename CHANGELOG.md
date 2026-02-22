@@ -1,3 +1,7 @@
+## 1.1.0
+
+- **Breaking Change**: Renamed `NativeAd` to `FlutterNativeAd` and `NativeAdOptions` to `FlutterNativeAdOptions`.
+
 ## 1.0.2
 
 - **Critical Fix (Android)**: Resolved `Unresolved reference 'contentUrl'` compilation error.

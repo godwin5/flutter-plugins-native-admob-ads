@@ -1,4 +1,4 @@
-class NativeAd {
+class FlutterNativeAd {
   final String id;
   final String? headline;
   final String? body;
@@ -8,7 +8,7 @@ class NativeAd {
   final String? cta;
   final String? adChoicesUrl;
 
-  NativeAd({
+  FlutterNativeAd({
     required this.id,
     this.headline,
     this.body,
@@ -19,8 +19,8 @@ class NativeAd {
     this.adChoicesUrl,
   });
 
-  factory NativeAd.fromMap(Map<String, dynamic> map) {
-    return NativeAd(
+  factory FlutterNativeAd.fromMap(Map<String, dynamic> map) {
+    return FlutterNativeAd(
       id: map['id'] as String,
       headline: map['headline'] as String?,
       body: map['body'] as String?,
@@ -33,12 +33,12 @@ class NativeAd {
   }
 }
 
-class NativeAdOptions {
+class FlutterNativeAdOptions {
   final String adId;
   final bool isTesting;
   final int adsCount;
 
-  NativeAdOptions({required this.adId, this.isTesting = false, this.adsCount = 1})
+  FlutterNativeAdOptions({required this.adId, this.isTesting = false, this.adsCount = 1})
     : assert(adsCount >= 1 && adsCount <= 5);
 
   Map<String, dynamic> toMap() {
