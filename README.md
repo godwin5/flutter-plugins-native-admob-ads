@@ -78,7 +78,19 @@ onTap: () async {
 }
 ```
 
-### 3. Cleanup
+### 3. Handle AdChoices
+
+To comply with AdMob policies, you should always include an AdChoices icon that links to the `adChoicesUrl`:
+
+```dart
+if (ad.adChoicesUrl != null)
+  GestureDetector(
+    onTap: () => launchUrl(Uri.parse(ad.adChoicesUrl!)),
+    child: const Icon(Icons.info_outline, size: 14),
+  );
+```
+
+### 4. Cleanup
 
 To prevent memory leaks, always dispose of the ad when the widget is destroyed:
 

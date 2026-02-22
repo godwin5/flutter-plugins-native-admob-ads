@@ -70,7 +70,7 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
     adMap["cta"] = nativeAd.callToAction ?? ""
     adMap["icon"] = nativeAd.icon?.imageURL?.absoluteString ?? ""
     adMap["cover"] = nativeAd.images?.first?.imageURL?.absoluteString ?? ""
-    adMap["adChoicesUrl"] = "https://adssettings.google.com/whythisad"
+    adMap["adChoicesUrl"] = nativeAd.adChoicesInfo?.contentURL?.absoluteString ?? "https://adssettings.google.com/whythisad"
 
     // Proxy View Setup
     DispatchQueue.main.async {

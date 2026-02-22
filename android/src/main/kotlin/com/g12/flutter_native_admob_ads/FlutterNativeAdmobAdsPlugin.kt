@@ -114,7 +114,7 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         map["cta"] = nativeAd.callToAction ?: ""
         map["icon"] = nativeAd.icon?.uri?.toString() ?: ""
         map["cover"] = nativeAd.images.firstOrNull()?.uri?.toString() ?: ""
-        map["adChoicesUrl"] = "https://adssettings.google.com/whythisad"
+        map["adChoicesUrl"] = nativeAd.adChoicesInfo?.contentUrl ?: "https://adssettings.google.com/whythisad"
 
         // Create the proxy view
         activity?.runOnUiThread {

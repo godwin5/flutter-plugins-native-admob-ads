@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_admob_ads/flutter_native_admob_ads.dart';
 import 'package:flutter_native_admob_ads/native_ad_models.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -122,13 +123,23 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Ad attribution tag
+          // Ad attribution row
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             color: Colors.amber,
-            child: const Text(
-              'AD',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'AD',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+                if (ad.adChoicesUrl != null)
+                  GestureDetector(
+                    onTap: () => launchUrl(Uri.parse(ad.adChoicesUrl!)),
+                    child: const Icon(Icons.info_outline, size: 14, color: Colors.black),
+                  ),
+              ],
             ),
           ),
 
