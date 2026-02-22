@@ -49,9 +49,16 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
     let multipleAdsOptions = GADMultipleAdsOptions()
     multipleAdsOptions.numberOfAds = adsCount
 
+    let window = UIApplication.shared.connectedScenes
+      .filter { $0.activationState == .foregroundActive }
+      .map { $0 as? UIWindowScene }
+      .compactMap { $0 }
+      .first?.windows
+      .filter { $0.isKeyWindow }.first
+
     adLoader = GADAdLoader(
       adUnitID: finalAdId,
-      rootViewController: UIApplication.shared.windows.first?.rootViewController,
+      rootViewController: window?.rootViewController,
       adTypes: [.native],
       options: [multipleAdsOptions]
     )
@@ -70,7 +77,7 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
     adMap["cta"] = nativeAd.callToAction ?? ""
     adMap["icon"] = nativeAd.icon?.imageURL?.absoluteString ?? ""
     adMap["cover"] = nativeAd.images?.first?.imageURL?.absoluteString ?? ""
-    adMap["adChoicesUrl"] = nativeAd.adChoicesInfo?.contentURL?.absoluteString ?? "https://adssettings.google.com/whythisad"
+    adMap["adChoicesUrl"] = "https://adssettings.google.com/whythisad"
 
     // Proxy View Setup
     DispatchQueue.main.async {
@@ -84,7 +91,14 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
       adView.addSubview(ctaButton)
       adView.callToActionView = ctaButton
       
-      if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+      let window = UIApplication.shared.connectedScenes
+        .filter { $0.activationState == .foregroundActive }
+        .map { $0 as? UIWindowScene }
+        .compactMap { $0 }
+        .first?.windows
+        .filter { $0.isKeyWindow }.first
+
+      if let rootVC = window?.rootViewController {
         rootVC.view.addSubview(adView)
         // Position slightly off-screen to avoid accidental taps during registration window
         adView.frame = CGRect(x: -1, y: -1, width: 1, height: 1)

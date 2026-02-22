@@ -1,3 +1,7 @@
+## 1.0.2
+
+- **Critical Fix (Android)**: Resolved `Unresolved reference 'contentUrl'` compilation error that broke Android builds in 1.0.1.
+
 ## 1.0.1
 
 - **AdChoices Update**: Improved AdChoices URL handling for Android and iOS.
