@@ -1,3 +1,9 @@
+## 1.0.1
+
+- **AdChoices Update**: Improved AdChoices URL handling for Android and iOS.
+- **Example Fix**: Resolved missing `url_launcher` import in the example app.
+- **License Change**: Switched to 0BSD license.
+
 ## 1.0.0
 
 - **Initial release**: First official release of `flutter_native_admob_ads`.
