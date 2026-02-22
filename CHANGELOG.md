@@ -1,6 +1,7 @@
 ## 1.0.2
 
-- **Critical Fix (Android)**: Resolved `Unresolved reference 'contentUrl'` compilation error that broke Android builds in 1.0.1.
+- **Critical Fix (Android)**: Resolved `Unresolved reference 'contentUrl'` compilation error.
+- **iOS Fixes**: Modernized root view controller access and standardized AdChoices handling for consistency.
 
 ## 1.0.1
 
