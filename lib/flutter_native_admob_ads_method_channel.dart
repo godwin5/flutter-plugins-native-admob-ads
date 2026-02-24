@@ -11,11 +11,16 @@ class MethodChannelFlutterNativeAdmobAds extends FlutterNativeAdmobAdsPlatform {
   final methodChannel = const MethodChannel('flutter_native_admob_ads');
 
   @override
-  Future<List<FlutterNativeAd>> loadNativeAd(FlutterNativeAdOptions options) async {
-    final List<dynamic>? result = await methodChannel.invokeMethod<List<dynamic>>(
-      'loadNativeAd',
-      options.toMap(),
-    );
+  Future<List<FlutterNativeAd>> loadNativeAd({
+    required String adId,
+    bool isTesting = false,
+    int adsCount = 1,
+  }) async {
+    final List<dynamic>? result = await methodChannel.invokeMethod<List<dynamic>>('loadNativeAd', {
+      'adId': adId,
+      'isTesting': isTesting,
+      'adsCount': adsCount,
+    });
 
     if (result == null) return [];
 

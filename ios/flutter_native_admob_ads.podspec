@@ -4,13 +4,13 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_native_admob_ads'
-  s.version          = '1.0.0'
+  s.version          = '1.3.0'
   s.summary          = 'A specialized Flutter plugin for AdMob Native Ads with 100% custom UI freedom.'
   s.description      = <<-DESC
 A specialized Flutter plugin for AdMob Native Ads that allows for 100% custom UIs built entirely in Flutter, while maintaining native click handling and impression tracking.
                        DESC
-  s.homepage         = 'https://github.com/godwin5/capacitor-admob-ads'
-  s.license          = { :file => '../LICENSE' }
+  s.homepage         = 'https://github.com/godwin5/flutter-plugins-native-admob-ads'
+  s.license          = { :type => 'Zero-Clause BSD', :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'

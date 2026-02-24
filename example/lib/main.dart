@@ -43,11 +43,9 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
 
     try {
       final ads = await _admobPlugin.loadNativeAd(
-        FlutterNativeAdOptions(
-          adId: 'ca-app-pub-3940256099942544/2247696110', // Android Test ID
-          isTesting: true,
-          adsCount: 1,
-        ),
+        adId: 'ca-app-pub-3940256099942544/2247696110', // Test ID
+        isTesting: true,
+        adsCount: 1,
       );
 
       if (ads.isNotEmpty) {

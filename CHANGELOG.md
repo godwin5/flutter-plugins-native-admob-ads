@@ -1,3 +1,10 @@
+## 1.3.0
+
+- Refactored `loadNativeAd`: Changed from `FlutterNativeAdOptions` class to named parameters for a cleaner API.
+- Added descriptive documentation comments to all properties in `FlutterNativeAd`.
+- Reformatted LICENSE for better recognition by pub.dev.
+- Fixed iOS podspec metadata (homepage and license information).
+
 ## 1.2.0
 
 - **Exhaustive NativeAd Support**: Added support for all standard AdMob NativeAd fields:

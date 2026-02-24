@@ -56,11 +56,11 @@ import 'package:flutter_native_admob_ads/native_ad_models.dart';
 
 final _plugin = FlutterNativeAdmobAds();
 
-final ads = await _plugin.loadNativeAd(FlutterNativeAdOptions(
+final ads = await _plugin.loadNativeAd(
   adId: 'ca-app-pub-3940256099942544/2247696110', // Test ID
   isTesting: true,
   adsCount: 1,
-));
+);
 
 if (ads.isNotEmpty) {
   final ad = ads.first;

@@ -8,13 +8,17 @@ class MockFlutterNativeAdmobAdsPlatform
     with MockPlatformInterfaceMixin
     implements FlutterNativeAdmobAdsPlatform {
   @override
-  Future<List<FlutterNativeAd>> loadNativeAd(FlutterNativeAdOptions options) => Future.value([]);
+  Future<List<FlutterNativeAd>> loadNativeAd({
+    required String adId,
+    bool isTesting = false,
+    int adsCount = 1,
+  }) async => [];
 
   @override
-  Future<void> triggerNativeAd(String id) => Future.value();
+  Future<void> triggerNativeAd(String id) async {}
 
   @override
-  Future<void> disposeNativeAd(String id) => Future.value();
+  Future<void> disposeNativeAd(String id) async {}
 }
 
 void main() {
