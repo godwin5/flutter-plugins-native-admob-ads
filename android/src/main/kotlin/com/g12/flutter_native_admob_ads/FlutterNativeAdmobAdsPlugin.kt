@@ -3,6 +3,7 @@ package com.g12.flutter_native_admob_ads
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -84,6 +85,18 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
                     failedCount++
                     checkCompletion(loadedCount, failedCount, adsCount, adsToReturn, result)
                 }
+
+                override fun onAdOpened() {
+                }
+
+                override fun onAdClicked() {
+                }
+
+                override fun onAdClosed() {
+                }
+
+                override fun onAdImpression() {
+                }
             })
             .withNativeAdOptions(NativeAdOptions.Builder().build())
             .build()
@@ -108,42 +121,53 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         val map = HashMap<String, String>()
         
         map["id"] = id
-        map["headline"] = nativeAd.headline ?: ""
-        map["body"] = nativeAd.body ?: ""
-        map["advertiser"] = nativeAd.advertiser ?: ""
-        map["cta"] = nativeAd.callToAction ?: ""
-        map["icon"] = nativeAd.icon?.uri?.toString() ?: ""
-        map["cover"] = nativeAd.images.firstOrNull()?.uri?.toString() ?: ""
-        map["adChoicesUrl"] = "https://adssettings.google.com/whythisad"
+    map["headline"] = nativeAd.headline ?: ""
+    map["body"] = nativeAd.body ?: ""
+    map["advertiser"] = nativeAd.advertiser ?: ""
+    map["cta"] = nativeAd.callToAction ?: ""
+    map["starRating"] = nativeAd.starRating?.toString() ?: ""
+    map["store"] = nativeAd.store ?: ""
+    map["price"] = nativeAd.price ?: ""
+    map["icon"] = nativeAd.icon?.uri?.toString() ?: ""
+    
+    val imageList = nativeAd.images.mapNotNull { it.uri?.toString() }
+    map["images"] = if (imageList.isNotEmpty()) imageList.joinToString(",") else ""
+    map["cover"] = imageList.firstOrNull() ?: ""
+    
+    val adChoices = nativeAd.adChoicesInfo
+    map["adChoicesUrl"] = "https://adssettings.google.com/whythisad"
+    map["adChoicesText"] = adChoices?.text?.toString() ?: ""
 
         // Create the proxy view
         activity?.runOnUiThread {
             val adView = NativeAdView(context!!)
             adView.visibility = View.VISIBLE
+            adView.alpha = 0.01f // Almost invisible but technically "visible" to SDK
             
             // Minimal CTA button to trigger click
             val ctaView = Button(context!!)
             ctaView.text = nativeAd.callToAction
+            // Ensure button fills the proxy ad view to have valid click coordinates
+            val buttonParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            ctaView.layoutParams = buttonParams
             adView.addView(ctaView)
             adView.callToActionView = ctaView
             
+            // Register the native ad
             adView.setNativeAd(nativeAd)
             
-            // 1x1 and visible to allow SDK registration
-            // Move it slightly off-screen (-1, -1) but keep it technically "on screen"
-            val params = FrameLayout.LayoutParams(1, 1)
-            params.leftMargin = -1
-            params.topMargin = -1
+            // Add to activity: 100x100 size (safely above 32px limit)
+            val params = FrameLayout.LayoutParams(100, 100)
+            params.leftMargin = 0
+            params.topMargin = 0
             activity?.addContentView(adView, params)
             
             synchronized(adViews) {
                 adViews[id] = adView
             }
-            
-            // Hide it after a short delay once registered
-            adView.postDelayed({
-                adView.visibility = View.GONE
-            }, 1000)
         }
 
         return map
@@ -155,7 +179,26 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         
         if (adView != null) {
             activity?.runOnUiThread {
-                adView.callToActionView?.performClick()
+                val ctaView = adView.callToActionView
+                if (ctaView != null) {
+                    // Simulate a real touch in the center of the view (50, 50 for a 100x100 view)
+                    // This provides valid click coordinates to the AdMob SDK
+                    val x = 50f
+                    val y = 50f
+                    val downTime = System.currentTimeMillis()
+                    val eventTime = System.currentTimeMillis()
+
+                    val downEvent = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_DOWN, x, y, 0)
+                    val upEvent = MotionEvent.obtain(downTime, eventTime + 50, MotionEvent.ACTION_UP, x, y, 0)
+
+                    ctaView.dispatchTouchEvent(downEvent)
+                    ctaView.dispatchTouchEvent(upEvent)
+
+                    downEvent.recycle()
+                    upEvent.recycle()
+                } else {
+                    adView.performClick()
+                }
                 result.success(null)
             }
         } else {

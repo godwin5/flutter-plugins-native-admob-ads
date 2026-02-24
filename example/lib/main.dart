@@ -73,6 +73,7 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
   Future<void> _handleAdClick() async {
     if (_loadedAd != null) {
       await _admobPlugin.triggerNativeAd(_loadedAd!.id);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ad click triggered!')));
     }
   }
@@ -149,7 +150,8 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
               ad.cover!,
               height: 180,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const SizedBox(height: 180, child: Icon(Icons.image)),
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox(height: 180, child: Icon(Icons.image)),
             ),
 
           Padding(
@@ -164,17 +166,50 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
                   ),
                 const SizedBox(width: 12),
 
-                // Headline & Body
+                // Headline, Star Rating, Body
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        ad.headline ?? 'No Headline',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              ad.headline ?? 'No Headline',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (ad.starRating != null)
+                            Row(
+                              children: [
+                                const Icon(Icons.star, size: 14, color: Colors.orange),
+                                Text(
+                                  ad.starRating!.toStringAsFixed(1),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                        ],
                       ),
+                      if (ad.advertiser != null || ad.store != null || ad.price != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            [
+                              ad.advertiser,
+                              ad.store,
+                              ad.price,
+                            ].whereType<String>().where((s) => s.isNotEmpty).join(' • '),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.blueGrey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 2),
                       Text(
                         ad.body ?? '',
                         style: const TextStyle(fontSize: 12, color: Colors.grey),

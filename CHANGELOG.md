@@ -1,3 +1,14 @@
+## 1.2.0
+
+- **Exhaustive NativeAd Support**: Added support for all standard AdMob NativeAd fields:
+  - Star Rating (`double? starRating`)
+  - Store (`String? store`)
+  - Price (`String? price`)
+  - Multiple Images (`List<String> images`)
+  - AdChoices Text (`String? adChoicesText`)
+- **Example Update**: Enhanced example app UI to demonstrate new metadata fields.
+- **Backward Compatibility**: Kept `cover` as a getter for `images.firstOrNull`.
+
 ## 1.1.0
 
 - **Breaking Change**: Renamed `NativeAd` to `FlutterNativeAd` and `NativeAdOptions` to `FlutterNativeAdOptions`.
