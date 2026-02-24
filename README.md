@@ -22,7 +22,7 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_native_admob_ads: ^1.1.0
+  flutter_native_admob_ads: ^1.3.0
 ```
 
 ## Platform Setup
@@ -78,6 +78,9 @@ onTap: () async {
 }
 ```
 
+> [!WARNING]  
+> **Policy Compliance**: You must ONLY call `triggerNativeAd` in response to a **direct, intentional user interaction** (e.g., a tap on a button). Triggering clicks programmatically without user intent ("fake clicks"), or placing invisible overlays that trick users into clicking, is a violation of AdMob policies and can lead to account suspension.
+
 ### 3. Handle AdChoices
 
 To comply with AdMob policies, you should always include an AdChoices icon that links to the `adChoicesUrl`:
@@ -110,4 +113,4 @@ void dispose() {
 
 ## License
 
-MIT
+Zero-Clause BSD (0BSD)

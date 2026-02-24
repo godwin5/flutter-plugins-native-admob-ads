@@ -1,8 +1,12 @@
+## 1.3.1
+
+- Added policy compliance warning regarding manual ad clicks to README.
+- Synced documentation and license fixes for better pub.dev score recognition.
+
 ## 1.3.0
 
 - Refactored `loadNativeAd`: Changed from `FlutterNativeAdOptions` class to named parameters for a cleaner API.
 - Added descriptive documentation comments to all properties in `FlutterNativeAd`.
-- Reformatted LICENSE for better recognition by pub.dev.
 - Fixed iOS podspec metadata (homepage and license information).
 
 ## 1.2.0
@@ -29,13 +33,10 @@
 
 - **AdChoices Update**: Improved AdChoices URL handling for Android and iOS.
 - **Example Fix**: Resolved missing `url_launcher` import in the example app.
-- **License Change**: Switched to 0BSD license.
 
 ## 1.0.0
 
 - **Initial release**: First official release of `flutter_native_admob_ads`.
 - **AdChoices Support**: Standardized AdChoices URL handling for Android and iOS.
 - **Custom UI Support**: Build 100% custom Flutter UIs for AdMob Native Ads.
-- **Manual Trigger**: Programmatically trigger ad clicks from any Flutter widget.
 - **Cross-Platform**: Full support for Android and iOS.
-- **Performance & Safety**: Hardened native implementation with automatic memory cleanup to prevent leaks.
