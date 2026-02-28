@@ -1,3 +1,11 @@
+## 1.4.0
+
+- **License Update**: Switched to standard MIT license.
+
+## 1.3.2
+
+- **Fix**: Resolved an issue where a visible "dot" appeared on Android by reducing the native proxy view's alpha.
+
 ## 1.3.1
 
 - Added policy compliance warning regarding manual ad clicks to README.

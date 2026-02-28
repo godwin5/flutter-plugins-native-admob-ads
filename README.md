@@ -113,4 +113,4 @@ void dispose() {
 
 ## License
 
-Zero-Clause BSD (0BSD)
+MIT License
