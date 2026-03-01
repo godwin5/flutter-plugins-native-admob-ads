@@ -1,6 +1,6 @@
 name: flutter_native_admob_ads
 description: "A specialized Flutter plugin for AdMob Native Ads that allows for 100% custom UIs built entirely in Flutter."
-version: 1.4.0
+version: 1.4.1
 homepage: https://github.com/godwin5/flutter-plugins-native-admob-ads
 repository: https://github.com/godwin5/flutter-plugins-native-admob-ads
 

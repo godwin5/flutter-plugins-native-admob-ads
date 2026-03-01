@@ -3,6 +3,7 @@ package com.g12.flutter_native_admob_ads
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -142,7 +143,7 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         activity?.runOnUiThread {
             val adView = NativeAdView(context!!)
             adView.visibility = View.VISIBLE
-            adView.alpha = 0.00000000000001f // Almost invisible but technically "visible" to SDK
+            adView.alpha = 0.0f // Invisible but technically "visible" to SDK
             
             // Minimal CTA button to trigger click
             val ctaView = Button(context!!)
@@ -159,10 +160,9 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
             // Register the native ad
             adView.setNativeAd(nativeAd)
             
-            // Add to activity: 100x100 size (safely above 32px limit)
-            val params = FrameLayout.LayoutParams(100, 100)
-            params.leftMargin = 0
-            params.topMargin = 0
+            // Centered 1x1 size
+            val params = FrameLayout.LayoutParams(1, 1)
+            params.gravity = Gravity.CENTER
             activity?.addContentView(adView, params)
             
             synchronized(adViews) {

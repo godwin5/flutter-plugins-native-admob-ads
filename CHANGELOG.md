@@ -1,3 +1,7 @@
+## 1.4.1
+
+- **Fix**: Improved ad click reliability on Android by centering the proxy native view.
+
 ## 1.4.0
 
 - **License Update**: Switched to standard MIT license.
