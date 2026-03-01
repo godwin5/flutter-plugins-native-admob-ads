@@ -1,3 +1,7 @@
+## 1.4.2
+
+- **Optimization**: Synchronized iOS proxy view settings with Android (centered, 1x1 size, 0.0 alpha).
+
 ## 1.4.1
 
 - **Fix**: Improved ad click reliability on Android by centering the proxy native view.

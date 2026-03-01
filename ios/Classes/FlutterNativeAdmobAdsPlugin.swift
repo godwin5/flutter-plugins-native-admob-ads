@@ -106,18 +106,14 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
         .first?.windows
         .filter { $0.isKeyWindow }.first
 
-      if let rootVC = window?.rootViewController {
-        rootVC.view.addSubview(adView)
-        // Position slightly off-screen to avoid accidental taps during registration window
-        adView.frame = CGRect(x: -1, y: -1, width: 1, height: 1)
+      if let rootView = window?.rootViewController?.view {
+        rootView.addSubview(adView)
+        // Center 1x1 proxy view
+        adView.frame = CGRect(x: rootView.bounds.midX, y: rootView.bounds.midY, width: 1, height: 1)
+        adView.alpha = 0.0
       }
       
       self.adViews[adId] = adView
-      
-      // Hide after registration (approx 1s)
-      DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-          adView.isHidden = true
-      }
     }
 
     finalizeRequest(adLoader, adMap: adMap)
