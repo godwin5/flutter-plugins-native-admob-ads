@@ -1,3 +1,10 @@
+## 1.5.2
+
+- **Scroll Fixed**: Restored standard scrolling behavior by removing the aggressive gesture recognizer. Use the ad's non-interactive areas to scroll.
+- **Click Fixed**: Changed the background of the click overlay to be transparent instead of invisible. This ensures it catches clicks more reliably even before a scroll happens.
+- **Improved Hiding**: Added a robust cleanup loop to catch and hide AdChoices icons that pop up after the ad loads.
+- **Stability**: Added a unique `ValueKey` to the native click overlay to prevent "ghosting" when scrolling through lists of ads.
+
 ## 1.5.1
 
 - **Final AdChoices Fix**: Blocked the native AdChoices icon from overlapping your custom Flutter UI.

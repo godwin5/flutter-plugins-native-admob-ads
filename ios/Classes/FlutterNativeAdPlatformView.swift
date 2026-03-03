@@ -15,43 +15,40 @@ class FlutterNativeAdPlatformView: NSObject, FlutterPlatformView {
         _view = GADNativeAdView(frame: frame)
         _ctaButton = UIButton(frame: frame)
         
+        _view.isUserInteractionEnabled = true
+        _ctaButton.isUserInteractionEnabled = true
         super.init()
-        
-        // Transparent CTA button that fills the view
         _ctaButton.backgroundColor = .clear
         _ctaButton.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
+        // Hide the auto-injected AdChoices icon to allow custom Flutter implementation
+        // We use a small view at the back of the stack to avoid blocking clicks
+        let adChoicesView = GADAdChoicesView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+        adChoicesView.isHidden = true
+        _view.addSubview(adChoicesView)
+        _view.adChoicesView = adChoicesView
+
         _view.addSubview(_ctaButton)
         _view.callToActionView = _ctaButton
         _view.nativeAd = nativeAd
-        
-        // Aggressively hide the AdChoices icon by providing a full-size invisible view
-        let adChoicesView = GADAdChoicesView(frame: _view.bounds)
-        adChoicesView.alpha = 0
-        adChoicesView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        _view.addSubview(adChoicesView)
-        _view.adChoicesView = adChoicesView
-        
-        // Enforce hiding after a delay to catch the SDK's "delayed" injection
+
+        // Robust hiding loop to catch delayed SDK injections
         enforceHiding()
     }
 
-    private func enforceHiding(checks: Int = 0) {
-        let view = self._view
-        let cta = self._ctaButton
-        
-        // Hide all subviews except the CTA
-        for subview in view.subviews {
-            if subview != cta {
-                subview.alpha = 0
+    private fun enforceHiding(checks: Int = 0) {
+        // Surgical sweep: hide anything that isn't our CTA overlay
+        for subview in _view.subviews {
+            if subview != _ctaButton {
                 subview.isHidden = true
+                subview.alpha = 0
             }
         }
-        view.adChoicesView?.alpha = 0
-        view.adChoicesView?.isHidden = true
+        _view.adChoicesView?.isHidden = true
+        _view.adChoicesView?.alpha = 0
         
-        if checks < 5 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+        if checks < 6 { // Check 6 times over 3 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.enforceHiding(checks: checks + 1)
             }
         }

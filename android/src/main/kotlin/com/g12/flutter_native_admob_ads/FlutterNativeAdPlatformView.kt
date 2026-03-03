@@ -1,11 +1,12 @@
 package com.g12.flutter_native_admob_ads
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.FrameLayout
 import com.google.android.gms.ads.nativead.AdChoicesView
 import com.google.android.gms.ads.nativead.NativeAd
@@ -18,34 +19,49 @@ class FlutterNativeAdPlatformView(
 ) : PlatformView {
 
     private val adView: NativeAdView = NativeAdView(context)
-    private val ctaView: Button = Button(context)
+    private val ctaView: View = View(context)
 
     init {
-        // Transparent CTA button that fills the view
-        ctaView.alpha = 0.0f
+        // Overlay for clicks - Using View instead of Button to be less aggressive with gestures
+        ctaView.setBackgroundColor(Color.TRANSPARENT)
+        ctaView.isClickable = true
+        ctaView.isFocusable = true
         ctaView.layoutParams = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
         
-        adView.addView(ctaView)
-        adView.callToActionView = ctaView
-        
-        // Aggressively hide the AdChoices icon by providing a full-size invisible view
+        // Listen for internal views being added (like AdChoices) and hide them immediately
+        adView.setOnHierarchyChangeListener(object : ViewGroup.OnHierarchyChangeListener {
+            override fun onChildViewAdded(parent: View?, child: View?) {
+                if (child != ctaView) {
+                    child?.visibility = View.GONE
+                    child?.alpha = 0f
+                }
+            }
+            override fun onChildViewRemoved(parent: View?, child: View?) {}
+        })
+
+        // Add AdChoices first so it's behind the CTA layer if needed
         nativeAd.adChoicesInfo?.let {
             val adChoicesView = AdChoicesView(context)
-            adChoicesView.alpha = 0.0f
-            adChoicesView.layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
+            adChoicesView.visibility = View.INVISIBLE
+            adChoicesView.layoutParams = FrameLayout.LayoutParams(1, 1).apply {
+                gravity = Gravity.TOP or Gravity.START
+            }
             adView.addView(adChoicesView)
             adView.adChoicesView = adChoicesView
         }
+
+        adView.addView(ctaView)
+        adView.callToActionView = ctaView
         
         adView.setNativeAd(nativeAd)
+        
+        // Ensure the view is laid out properly to register click areas
+        adView.requestLayout()
 
-        // Enforce hiding after a delay to catch the SDK's "delayed" injection
+        // Robust hiding loop to catch delayed SDK injections
         enforceHiding()
     }
 
@@ -54,6 +70,7 @@ class FlutterNativeAdPlatformView(
         val hideTask = object : Runnable {
             var checks = 0
             override fun run() {
+                // Surgical sweep: hide anything that isn't our CTA overlay
                 for (i in 0 until adView.childCount) {
                     val child = adView.getChildAt(i)
                     if (child != ctaView) {
@@ -61,17 +78,21 @@ class FlutterNativeAdPlatformView(
                         child.visibility = View.GONE
                     }
                 }
-                adView.adChoicesView?.alpha = 0f
-                adView.adChoicesView?.visibility = View.GONE
+                // Specifically target the AdChoices view if registered
+                adView.adChoicesView?.let {
+                    it.alpha = 0f
+                    it.visibility = View.GONE
+                }
                 
                 checks++
-                if (checks < 5) { // Check a few times over 3 seconds
-                    handler.postDelayed(this, 600)
+                if (checks < 6) { // Check 6 times over 3 seconds
+                    handler.postDelayed(this, 500)
                 }
             }
         }
         handler.post(hideTask)
     }
+
 
     override fun getView(): View {
         return adView

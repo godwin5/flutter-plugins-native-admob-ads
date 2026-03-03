@@ -23,6 +23,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.util.*
 import kotlin.collections.HashMap
+import android.widget.Toast
 
 /** FlutterNativeAdmobAdsPlugin */
 class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -87,18 +88,23 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
                 override fun onAdFailedToLoad(adError: LoadAdError) {
                     failedCount++
                     checkCompletion(loadedCount, failedCount, adsCount, adsToReturn, result)
+                    Toast.makeText(context, "Ad failed", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onAdOpened() {
+                    Toast.makeText(context, "Ad opened", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onAdClicked() {
+                    Toast.makeText(context, "Ad clicked", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onAdClosed() {
+                    Toast.makeText(context, "Ad closed", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onAdImpression() {
+                    Toast.makeText(context, "Ad impression", Toast.LENGTH_SHORT).show()
                 }
             })
             .withNativeAdOptions(NativeAdOptions.Builder().build())

@@ -71,11 +71,11 @@ class FlutterNativeAdView extends StatelessWidget {
 
         // Layer 2: Native Click Overlay
         Positioned.fill(
-          child: _PlatformView(viewType: viewType, creationParams: creationParams),
+          child: _PlatformView(key: ValueKey(ad.id), viewType: viewType, creationParams: creationParams),
         ),
 
         // Layer 3: Interactive elements (Not blocked)
-        if (overlay != null) overlay!,
+        ?overlay,
       ],
     );
   }
@@ -85,7 +85,7 @@ class _PlatformView extends StatelessWidget {
   final String viewType;
   final Map<String, dynamic> creationParams;
 
-  const _PlatformView({required this.viewType, required this.creationParams});
+  const _PlatformView({super.key, required this.viewType, required this.creationParams});
 
   @override
   Widget build(BuildContext context) {
