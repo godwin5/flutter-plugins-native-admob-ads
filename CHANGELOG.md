@@ -1,3 +1,13 @@
+## 1.5.0
+
+- **Major Refactor**: Migrated click handling to a `PlatformView` overlay approach.
+- **Improved Reliability**: Fixed "Invalid click coordinates" and "size too small" SDK warnings.
+- **Breaking Change**: Removed `triggerNativeAd` method. Clicks are now handled automatically by the UI overlay.
+- **Breaking Change**: `FlutterNativeAd.icon` and `FlutterNativeAd.images` now return structured objects/lists with metadata.
+- **New Feature**: Added image metadata support (width, height, scale).
+- **New Feature**: Added `aspectRatio` property to `FlutterNativeAd` for perfect layout scaling.
+- **Null Safety**: All optional ad properties now return `null` instead of empty strings.
+
 ## 1.4.2
 
 - **Optimization**: Synchronized iOS proxy view settings with Android (centered, 1x1 size, 0.0 alpha).

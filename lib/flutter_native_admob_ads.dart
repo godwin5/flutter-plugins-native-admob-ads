@@ -75,7 +75,7 @@ class FlutterNativeAdView extends StatelessWidget {
         ),
 
         // Layer 3: Interactive elements (Not blocked)
-        ?overlay,
+        if (overlay != null) overlay!,
       ],
     );
   }
