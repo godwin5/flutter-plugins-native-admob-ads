@@ -1,68 +1,50 @@
+## 1.5.1
+
+- **Final AdChoices Fix**: Blocked the native AdChoices icon from overlapping your custom Flutter UI.
+- **Better Docs**: Polished the README with clearer examples for the new layout features.
+
 ## 1.5.0
 
-- **Major Refactor**: Migrated click handling to a `PlatformView` overlay approach.
-- **Improved Reliability**: Fixed "Invalid click coordinates" and "size too small" SDK warnings.
-- **Breaking Change**: Removed `triggerNativeAd` method. Clicks are now handled automatically by the UI overlay.
-- **Breaking Change**: `FlutterNativeAd.icon` and `FlutterNativeAd.images` now return structured objects/lists with metadata.
-- **New Feature**: Added image metadata support (width, height, scale).
-- **New Feature**: Added `aspectRatio` property to `FlutterNativeAd` for perfect layout scaling.
-- **Null Safety**: All optional ad properties now return `null` instead of empty strings.
+- **Big Architectural Shift**: Moved to a native overlay for click handling. This finally kills the "Invalid click coordinates" and "size too small" warnings.
+- **Asset Metadata**: You now get `width`, `height`, and `scale` for all images and icons.
+- **Pixel Perfect Layouts**: Added `ad.aspectRatio`. Use it with the Flutter `AspectRatio` widget to make your ads look great on any screen.
+- **Cleaner API**: Removed the manual `triggerNativeAd` method and swapped empty strings for proper `null` values for missing properties.
 
 ## 1.4.2
 
-- **Optimization**: Synchronized iOS proxy view settings with Android (centered, 1x1 size, 0.0 alpha).
+- **iOS Sync**: Made the iOS proxy view match the Android settings for better consistency.
 
 ## 1.4.1
 
-- **Fix**: Improved ad click reliability on Android by centering the proxy native view.
+- **Click Fix**: Centered the proxy view on Android to make clicks even more reliable.
 
 ## 1.4.0
 
-- **License Update**: Switched to standard MIT license.
+- **License Update**: Switched the project to the standard MIT license.
 
 ## 1.3.2
 
-- **Fix**: Resolved an issue where a visible "dot" appeared on Android by reducing the native proxy view's alpha.
+- **Visual Fix**: Fixed a tiny visible "dot" that sometimes appeared on Android.
 
 ## 1.3.1
 
-- Added policy compliance warning regarding manual ad clicks to README.
-- Synced documentation and license fixes for better pub.dev score recognition.
+- **Documentation**: Added policy warnings to the README and improved the pub.dev search score.
 
 ## 1.3.0
 
-- Refactored `loadNativeAd`: Changed from `FlutterNativeAdOptions` class to named parameters for a cleaner API.
-- Added descriptive documentation comments to all properties in `FlutterNativeAd`.
-- Fixed iOS podspec metadata (homepage and license information).
+- **Cleaner Loading**: Switched `loadNativeAd` to named parameters for a better dev experience.
+- **Better Docs**: Added detailed comments to all ad properties.
+- **iOS Metadata**: Fixed the podspec to show the correct project links.
 
 ## 1.2.0
 
-- **Exhaustive NativeAd Support**: Added support for all standard AdMob NativeAd fields:
-  - Star Rating (`double? starRating`)
-  - Store (`String? store`)
-  - Price (`String? price`)
-  - Multiple Images (`List<String> images`)
-  - AdChoices Text (`String? adChoicesText`)
-- **Example Update**: Enhanced example app UI to demonstrate new metadata fields.
-- **Backward Compatibility**: Kept `cover` as a getter for `images.firstOrNull`.
+- **Full Metadata Support**: Added support for star ratings, store names, prices, and multiple images.
+- **Compatibility**: Kept the `cover` property as a shortcut for the first image in the list.
 
 ## 1.1.0
 
-- **Breaking Change**: Renamed `NativeAd` to `FlutterNativeAd` and `NativeAdOptions` to `FlutterNativeAdOptions`.
-
-## 1.0.2
-
-- **Critical Fix (Android)**: Resolved `Unresolved reference 'contentUrl'` compilation error.
-- **iOS Fixes**: Modernized root view controller access and standardized AdChoices handling for consistency.
-
-## 1.0.1
-
-- **AdChoices Update**: Improved AdChoices URL handling for Android and iOS.
-- **Example Fix**: Resolved missing `url_launcher` import in the example app.
+- **Naming**: Renamed the core classes to `FlutterNativeAd` for better clarity.
 
 ## 1.0.0
 
-- **Initial release**: First official release of `flutter_native_admob_ads`.
-- **AdChoices Support**: Standardized AdChoices URL handling for Android and iOS.
-- **Custom UI Support**: Build 100% custom Flutter UIs for AdMob Native Ads.
-- **Cross-Platform**: Full support for Android and iOS.
+- **Initial Release**: The first official version of the plugin with full custom UI support and cross-platform compatibility.

@@ -118,7 +118,7 @@ void dispose() {
 Since you are building the UI, you are responsible for:
 
 1.  **"Ad" Attribution**: Clearly marking the content as an advertisement.
-2.  **AdChoices Icon**: Using the provided `adChoicesUrl` and `adChoicesText` to display an AdChoices icon.
+2.  **AdChoices Icon**: Using the provided `adChoicesUrl` and `adChoicesText` to display an AdChoices icon. **Note**: The native AdChoices icon is automatically hidden by the plugin to allow your custom Flutter implementation to work without overlap.
 3.  **Interaction**: Use the `overlay` parameter of `FlutterNativeAdView` for any widgets that need to capture their own touches (like the AdChoices icon) to ensure they aren't blocked by the native click layer.
 
 ## Limitations
