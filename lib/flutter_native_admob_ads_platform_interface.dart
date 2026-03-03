@@ -34,11 +34,6 @@ abstract class FlutterNativeAdmobAdsPlatform extends PlatformInterface {
     throw UnimplementedError('loadNativeAd() has not been implemented.');
   }
 
-  /// Triggers a click on the specified ad.
-  Future<void> triggerNativeAd(String id) {
-    throw UnimplementedError('triggerNativeAd() has not been implemented.');
-  }
-
   /// Disposes of the specified ad.
   Future<void> disposeNativeAd(String id) {
     throw UnimplementedError('disposeNativeAd() has not been implemented.');

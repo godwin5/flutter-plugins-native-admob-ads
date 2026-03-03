@@ -28,11 +28,6 @@ class MethodChannelFlutterNativeAdmobAds extends FlutterNativeAdmobAdsPlatform {
   }
 
   @override
-  Future<void> triggerNativeAd(String id) async {
-    await methodChannel.invokeMethod('triggerNativeAd', {'id': id});
-  }
-
-  @override
   Future<void> disposeNativeAd(String id) async {
     await methodChannel.invokeMethod('disposeNativeAd', {'id': id});
   }

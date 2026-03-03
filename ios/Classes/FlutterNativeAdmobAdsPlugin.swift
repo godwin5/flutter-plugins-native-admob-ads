@@ -4,13 +4,18 @@ import GoogleMobileAds
 
 public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDelegate, GADNativeAdLoaderDelegate {
   private var adLoader: GADAdLoader?
-  private var adViews = [String: GADNativeAdView]()
+  internal var nativeAds = [String: GADNativeAd]()
   private var loadResults = [String: (loaded: [[String: String]], failed: Int, total: Int, result: FlutterResult)]()
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_native_admob_ads", binaryMessenger: registrar.messenger())
     let instance = FlutterNativeAdmobAdsPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
+    
+    registrar.register(
+      FlutterNativeAdPlatformViewFactory(plugin: instance),
+      withId: "flutter_native_ad_view"
+    )
     
     GADMobileAds.sharedInstance().start(completionHandler: nil)
   }
@@ -19,8 +24,6 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
     switch call.method {
     case "loadNativeAd":
       loadNativeAd(call, result: result)
-    case "triggerNativeAd":
-      triggerNativeAd(call, result: result)
     case "disposeNativeAd":
       disposeNativeAd(call, result: result)
     default:
@@ -87,34 +90,7 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
     adMap["adChoicesUrl"] = "https://adssettings.google.com/whythisad"
     adMap["adChoicesText"] = nativeAd.adChoicesInfo?.text ?? ""
 
-    // Proxy View Setup
-    DispatchQueue.main.async {
-      let adView = GADNativeAdView()
-      adView.isHidden = false
-      adView.nativeAd = nativeAd
-      
-      // Minimal CTA button
-      let ctaButton = UIButton()
-      ctaButton.setTitle(nativeAd.callToAction, for: .normal)
-      adView.addSubview(ctaButton)
-      adView.callToActionView = ctaButton
-      
-      let window = UIApplication.shared.connectedScenes
-        .filter { $0.activationState == .foregroundActive }
-        .map { $0 as? UIWindowScene }
-        .compactMap { $0 }
-        .first?.windows
-        .filter { $0.isKeyWindow }.first
-
-      if let rootView = window?.rootViewController?.view {
-        rootView.addSubview(adView)
-        // Center 1x1 proxy view
-        adView.frame = CGRect(x: rootView.bounds.midX, y: rootView.bounds.midY, width: 1, height: 1)
-        adView.alpha = 0.0
-      }
-      
-      self.adViews[adId] = adView
-    }
+    self.nativeAds[adId] = nativeAd
 
     finalizeRequest(adLoader, adMap: adMap)
   }
@@ -147,25 +123,6 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
     }
   }
 
-  private func triggerNativeAd(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    guard let args = call.arguments as? [String: Any],
-          let id = args["id"] as? String else {
-      result(FlutterError(code: "INVALID_ARGS", message: "ID is required", detail: nil))
-      return
-    }
-
-    if let adView = adViews[id] {
-      DispatchQueue.main.async {
-          if let cta = adView.callToActionView as? UIButton {
-              // Programmatic tap trigger
-              cta.sendActions(for: .touchUpInside)
-          }
-      }
-      result(nil)
-    } else {
-      result(FlutterError(code: "NOT_FOUND", message: "Ad not found", detail: nil))
-    }
-  }
 
   private func disposeNativeAd(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     guard let args = call.arguments as? [String: Any],
@@ -174,12 +131,7 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
       return
     }
 
-    if let adView = adViews.removeValue(forKey: id) {
-      DispatchQueue.main.async {
-        adView.removeFromSuperview()
-        adView.nativeAd = nil
-      }
-    }
+    self.nativeAds.removeValue(forKey: id)
     result(nil)
   }
 }

@@ -67,12 +67,16 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
     }
   }
 
-  /// Triggers a programmatic click on the native ad
-  Future<void> _handleAdClick() async {
+  /// Programmatically disposes of the current ad
+  Future<void> _disposeAd() async {
     if (_loadedAd != null) {
-      await _admobPlugin.triggerNativeAd(_loadedAd!.id);
+      final adId = _loadedAd!.id;
+      setState(() {
+        _loadedAd = null;
+      });
+      await _admobPlugin.disposeNativeAd(adId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ad click triggered!')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ad disposed')));
     }
   }
 
@@ -93,10 +97,24 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ElevatedButton.icon(
-              onPressed: _isLoading ? null : _loadAd,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Load Native Ad'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _loadAd,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Load Native Ad'),
+                ),
+                if (_loadedAd != null) ...[
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: _disposeAd,
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Dispose Ad'),
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                  ),
+                ],
+              ],
             ),
             const SizedBox(height: 32),
             if (_isLoading)
@@ -115,127 +133,138 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
 
   /// Builds a 100% custom Flutter UI for the native ad data
   Widget _buildNativeAdCard(FlutterNativeAd ad) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Ad attribution row
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            color: Colors.amber,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'AD',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
-                ),
-                if (ad.adChoicesUrl != null)
-                  GestureDetector(
-                    onTap: () => launchUrl(Uri.parse(ad.adChoicesUrl!)),
-                    child: const Icon(Icons.info_outline, size: 14, color: Colors.black),
-                  ),
-              ],
-            ),
-          ),
-
-          // Cover Image
-          if (ad.cover != null)
-            Image.network(
-              ad.cover!,
-              height: 180,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  const SizedBox(height: 180, child: Icon(Icons.image)),
-            ),
-
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                // Icon
-                if (ad.icon != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(ad.icon!, width: 48, height: 48),
-                  ),
-                const SizedBox(width: 12),
-
-                // Headline, Star Rating, Body
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              ad.headline ?? 'No Headline',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (ad.starRating != null)
-                            Row(
-                              children: [
-                                const Icon(Icons.star, size: 14, color: Colors.orange),
-                                Text(
-                                  ad.starRating!.toStringAsFixed(1),
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                      if (ad.advertiser != null || ad.store != null || ad.price != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            [
-                              ad.advertiser,
-                              ad.store,
-                              ad.price,
-                            ].whereType<String>().where((s) => s.isNotEmpty).join(' • '),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.blueGrey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 2),
-                      Text(
-                        ad.body ?? '',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // CTA Button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: ElevatedButton(
-              onPressed: _handleAdClick,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 44),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    return FlutterNativeAdView(
+      ad: ad,
+      overlay: ad.adChoicesUrl == null
+          ? null
+          : Positioned(
+              top: 4,
+              right: 8,
+              child: GestureDetector(
+                onTap: () => launchUrl(Uri.parse(ad.adChoicesUrl!)),
+                child: const Icon(Icons.info_outline, size: 14, color: Colors.black),
               ),
-              child: Text(ad.cta ?? 'Learn More'),
             ),
-          ),
-        ],
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Ad attribution row
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              color: Colors.amber,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'AD',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
+                  ),
+                  const SizedBox(width: 20),
+                ],
+              ),
+            ),
+
+            // Cover Image
+            if (ad.cover != null)
+              Image.network(
+                ad.cover!,
+                height: 180,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox(height: 180, child: Icon(Icons.image)),
+              ),
+
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  // Icon
+                  if (ad.icon != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(ad.icon!, width: 48, height: 48),
+                    ),
+                  const SizedBox(width: 12),
+
+                  // Headline, Star Rating, Body
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                ad.headline ?? 'No Headline',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (ad.starRating != null)
+                              Row(
+                                children: [
+                                  const Icon(Icons.star, size: 14, color: Colors.orange),
+                                  Text(
+                                    ad.starRating!.toStringAsFixed(1),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                        if (ad.advertiser != null || ad.store != null || ad.price != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              [
+                                ad.advertiser,
+                                ad.store,
+                                ad.price,
+                              ].whereType<String>().where((s) => s.isNotEmpty).join(' • '),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.blueGrey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 2),
+                        Text(
+                          ad.body ?? '',
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // CTA Button
+            // Note: Clicks on this button (and the entire card) are now handled
+            // by the native platform view overlay provided by FlutterNativeAdView.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: ElevatedButton(
+                onPressed: () {}, // Handled by FlutterNativeAdView overlay
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 44),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(ad.cta ?? 'Learn More'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

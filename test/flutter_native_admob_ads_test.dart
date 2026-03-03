@@ -15,9 +15,6 @@ class MockFlutterNativeAdmobAdsPlatform
   }) async => [];
 
   @override
-  Future<void> triggerNativeAd(String id) async {}
-
-  @override
   Future<void> disposeNativeAd(String id) async {}
 }
 
