@@ -71,7 +71,7 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         }
 
         val adsCount = call.argument<Int>("adsCount") ?: 1
-        val adsToReturn = Collections.synchronizedList(mutableListOf<Map<String, String>>())
+        val adsToReturn = Collections.synchronizedList(mutableListOf<Map<String, Any?>>())
         var loadedCount = 0
         var failedCount = 0
 
@@ -107,7 +107,7 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         adLoader.loadAds(AdRequest.Builder().build(), adsCount)
     }
 
-    private fun checkCompletion(loaded: Int, failed: Int, total: Int, ads: List<Map<String, String>>, result: Result) {
+    private fun checkCompletion(loaded: Int, failed: Int, total: Int, ads: List<Map<String, Any?>>, result: Result) {
         if (loaded + failed == total) {
             activity?.runOnUiThread {
                 if (loaded > 0) {
@@ -119,27 +119,59 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         }
     }
 
-    private fun mapNativeAd(nativeAd: NativeAd): Map<String, String> {
+    private fun mapNativeAd(nativeAd: NativeAd): Map<String, Any?> {
         val id = UUID.randomUUID().toString()
-        val map = HashMap<String, String>()
+        val map = HashMap<String, Any?>()
         
         map["id"] = id
-        map["headline"] = nativeAd.headline ?: ""
-        map["body"] = nativeAd.body ?: ""
-        map["advertiser"] = nativeAd.advertiser ?: ""
-        map["cta"] = nativeAd.callToAction ?: ""
-        map["starRating"] = nativeAd.starRating?.toString() ?: ""
-        map["store"] = nativeAd.store ?: ""
-        map["price"] = nativeAd.price ?: ""
-        map["icon"] = nativeAd.icon?.uri?.toString() ?: ""
+        map["headline"] = nativeAd.headline
+        map["body"] = nativeAd.body
+        map["advertiser"] = nativeAd.advertiser
+        map["cta"] = nativeAd.callToAction
+        map["starRating"] = nativeAd.starRating
+        map["store"] = nativeAd.store
+        map["price"] = nativeAd.price
         
-        val imageList = nativeAd.images.mapNotNull { it.uri?.toString() }
-        map["images"] = if (imageList.isNotEmpty()) imageList.joinToString(",") else ""
-        map["cover"] = imageList.firstOrNull() ?: ""
+        // Icon
+        nativeAd.icon?.let { adIcon ->
+            val iconMap = HashMap<String, Any?>()
+            iconMap["url"] = adIcon.uri?.toString()
+            adIcon.drawable?.let {
+                iconMap["width"] = it.intrinsicWidth.toDouble()
+                iconMap["height"] = it.intrinsicHeight.toDouble()
+            }
+            iconMap["scale"] = adIcon.scale
+            map["icon"] = iconMap
+        }
+        
+        // Images
+        val images = nativeAd.images
+        if (images.isNotEmpty()) {
+            val imageListData = images.map { adImage ->
+                val imageMap = HashMap<String, Any?>()
+                imageMap["url"] = adImage.uri?.toString()
+                adImage.drawable?.let {
+                    imageMap["width"] = it.intrinsicWidth.toDouble()
+                    imageMap["height"] = it.intrinsicHeight.toDouble()
+                }
+                imageMap["scale"] = adImage.scale
+                imageMap
+            }
+            map["images"] = imageListData
+            map["cover"] = imageListData.firstOrNull()?.get("url")
+        } else {
+            map["images"] = null
+            map["cover"] = null
+        }
+        
+        // Media Content (Aspect Ratio)
+        nativeAd.mediaContent?.let { media ->
+            map["aspectRatio"] = media.aspectRatio.toDouble()
+        }
         
         val adChoices = nativeAd.adChoicesInfo
         map["adChoicesUrl"] = "https://adssettings.google.com/whythisad"
-        map["adChoicesText"] = adChoices?.text?.toString() ?: ""
+        map["adChoicesText"] = adChoices?.text?.toString()
 
         synchronized(nativeAds) {
             nativeAds[id] = nativeAd

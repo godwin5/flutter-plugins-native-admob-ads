@@ -5,7 +5,7 @@ import GoogleMobileAds
 public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDelegate, GADNativeAdLoaderDelegate {
   private var adLoader: GADAdLoader?
   internal var nativeAds = [String: GADNativeAd]()
-  private var loadResults = [String: (loaded: [[String: String]], failed: Int, total: Int, result: FlutterResult)]()
+  private var loadResults = [String: (loaded: [[String: Any?]], failed: Int, total: Int, result: FlutterResult)]()
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_native_admob_ads", binaryMessenger: registrar.messenger())
@@ -71,31 +71,60 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
 
   public func adLoader(_ adLoader: GADAdLoader, didReceive nativeAd: GADNativeAd) {
     let adId = UUID().uuidString
-    var adMap = [String: String]()
+    var adMap = [String: Any?]()
     
     adMap["id"] = adId
-    adMap["headline"] = nativeAd.headline ?? ""
-    adMap["body"] = nativeAd.body ?? ""
-    adMap["advertiser"] = nativeAd.advertiser ?? ""
-    adMap["cta"] = nativeAd.callToAction ?? ""
-    adMap["starRating"] = nativeAd.starRating?.stringValue ?? ""
-    adMap["store"] = nativeAd.store ?? ""
-    adMap["price"] = nativeAd.price ?? ""
-    adMap["icon"] = nativeAd.icon?.imageURL?.absoluteString ?? ""
+    adMap["headline"] = nativeAd.headline
+    adMap["body"] = nativeAd.body
+    adMap["advertiser"] = nativeAd.advertiser
+    adMap["cta"] = nativeAd.callToAction
+    adMap["starRating"] = nativeAd.starRating
+    adMap["store"] = nativeAd.store
+    adMap["price"] = nativeAd.price
     
-    let imageUrls = nativeAd.images?.compactMap { $0.imageURL?.absoluteString } ?? []
-    adMap["images"] = imageUrls.joined(separator: ",")
-    adMap["cover"] = imageUrls.first ?? ""
+    // Icon
+    if let adIcon = nativeAd.icon {
+        var iconMap = [String: Any?]()
+        iconMap["url"] = adIcon.imageURL?.absoluteString
+        if let img = adIcon.image {
+            iconMap["width"] = Double(img.size.width)
+            iconMap["height"] = Double(img.size.height)
+        }
+        iconMap["scale"] = Double(adIcon.scale)
+        adMap["icon"] = iconMap
+    }
+    
+    // Images
+    if let images = nativeAd.images, !images.isEmpty {
+        let imageListData = images.map { adImage -> [String: Any?] in
+            var imageMap = [String: Any?]()
+            imageMap["url"] = adImage.imageURL?.absoluteString
+            if let img = adImage.image {
+                imageMap["width"] = Double(img.size.width)
+                imageMap["height"] = Double(img.size.height)
+            }
+            imageMap["scale"] = Double(adImage.scale)
+            return imageMap
+        }
+        adMap["images"] = imageListData
+        adMap["cover"] = imageListData.first?["url"] as? String
+    } else {
+        adMap["images"] = nil
+        adMap["cover"] = nil
+    }
+    
+    // Media Content (Aspect Ratio)
+    adMap["aspectRatio"] = Double(nativeAd.mediaContent.aspectRatio)
     
     adMap["adChoicesUrl"] = "https://adssettings.google.com/whythisad"
-    adMap["adChoicesText"] = nativeAd.adChoicesInfo?.text ?? ""
+    adMap["adChoicesText"] = nativeAd.adChoicesInfo?.text
 
     self.nativeAds[adId] = nativeAd
 
     finalizeRequest(adLoader, adMap: adMap)
   }
 
-  private func finalizeRequest(_ adLoader: GADAdLoader, adMap: [String: String]?) {
+  private func finalizeRequest(_ adLoader: GADAdLoader, adMap: [String: Any?]?) {
       for (key, var val) in loadResults {
           if let map = adMap {
               val.loaded.append(map)

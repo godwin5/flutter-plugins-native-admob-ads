@@ -170,23 +170,32 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
 
             // Cover Image
             if (ad.cover != null)
-              Image.network(
-                ad.cover!,
-                height: 180,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const SizedBox(height: 180, child: Icon(Icons.image)),
-              ),
+              ad.aspectRatio != null && ad.aspectRatio! > 0
+                  ? AspectRatio(
+                      aspectRatio: ad.aspectRatio!,
+                      child: Image.network(
+                        ad.cover!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.image),
+                      ),
+                    )
+                  : Image.network(
+                      ad.cover!,
+                      height: 180,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const SizedBox(height: 180, child: Icon(Icons.image)),
+                    ),
 
             Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
                   // Icon
-                  if (ad.icon != null)
+                  if (ad.icon?.url != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(ad.icon!, width: 48, height: 48),
+                      child: Image.network(ad.icon!.url!, width: 48, height: 48),
                     ),
                   const SizedBox(width: 12),
 
