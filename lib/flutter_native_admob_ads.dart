@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -81,29 +83,109 @@ class FlutterNativeAdView extends StatelessWidget {
   }
 }
 
-class _PlatformView extends StatelessWidget {
+class _PlatformView extends StatefulWidget {
   final String viewType;
   final Map<String, dynamic> creationParams;
 
   const _PlatformView({super.key, required this.viewType, required this.creationParams});
 
   @override
+  State<_PlatformView> createState() => _PlatformViewState();
+}
+
+class _PlatformViewState extends State<_PlatformView> {
+  bool _initialized = false;
+  double _opacity = 0.0;
+  Timer? _debounceTimer;
+  ScrollPosition? _scrollPosition;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _setupScrollListener();
+    }
+  }
+
+  void _setupScrollListener() {
+    // Stop listening to previous position if any
+    _scrollPosition?.removeListener(_onScrollChanged);
+
+    // Find the nearest scrollable ancestor
+    _scrollPosition = Scrollable.maybeOf(context)?.position;
+
+    if (_scrollPosition != null) {
+      _scrollPosition!.addListener(_onScrollChanged);
+      // Start initial timer in case we're already stationary
+      _onScrollChanged();
+    } else {
+      // Not in a scroll view, use simple delay
+      _startInitTimer();
+    }
+  }
+
+  void _onScrollChanged() {
+    if (_initialized) return;
+
+    // Reset timer whenever scrolling happens
+    _debounceTimer?.cancel();
+    _startInitTimer();
+  }
+
+  void _startInitTimer() {
+    _debounceTimer = Timer(const Duration(milliseconds: 200), () {
+      if (mounted && !_initialized) {
+        setState(() {
+          _initialized = true;
+        });
+        // Small delay before fading in to ensure native view is ready
+        Future.delayed(const Duration(milliseconds: 50), () {
+          if (mounted) {
+            setState(() {
+              _opacity = 1.0;
+            });
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _scrollPosition?.removeListener(_onScrollChanged);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const SizedBox.shrink();
+    }
+
+    Widget platformView;
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return AndroidView(
-        viewType: viewType,
+      platformView = AndroidView(
+        viewType: widget.viewType,
         layoutDirection: TextDirection.ltr,
-        creationParams: creationParams,
+        creationParams: widget.creationParams,
         creationParamsCodec: const StandardMessageCodec(),
       );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return UiKitView(
-        viewType: viewType,
+      platformView = UiKitView(
+        viewType: widget.viewType,
         layoutDirection: TextDirection.ltr,
-        creationParams: creationParams,
+        creationParams: widget.creationParams,
         creationParamsCodec: const StandardMessageCodec(),
       );
+    } else {
+      return const SizedBox.shrink();
     }
-    return const SizedBox.shrink();
+
+    return AnimatedOpacity(
+      opacity: _opacity,
+      duration: const Duration(milliseconds: 200),
+      child: platformView,
+    );
   }
 }

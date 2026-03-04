@@ -1,3 +1,8 @@
+## 1.5.3
+
+- **Buttery Smooth Scrolling**: Implemented "Async Native Binding" to fix those tiny freezes when scrolling past ads. The heavy work now happens in the background, making list scrolling much smoother.
+- **Performance**: Optimized the native view creation process to be as lightweight as possible.
+
 ## 1.5.2
 
 - **Scroll Fixed**: Restored standard scrolling behavior by removing the aggressive gesture recognizer. Use the ad's non-interactive areas to scroll.

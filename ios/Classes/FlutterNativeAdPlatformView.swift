@@ -21,22 +21,28 @@ class FlutterNativeAdPlatformView: NSObject, FlutterPlatformView {
         _ctaButton.backgroundColor = .clear
         _ctaButton.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
-        // Hide the auto-injected AdChoices icon to allow custom Flutter implementation
-        // We use a small view at the back of the stack to avoid blocking clicks
-        let adChoicesView = GADAdChoicesView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
-        adChoicesView.isHidden = true
-        _view.addSubview(adChoicesView)
-        _view.adChoicesView = adChoicesView
-
         _view.addSubview(_ctaButton)
         _view.callToActionView = _ctaButton
-        _view.nativeAd = nativeAd
+        
+        // Defer heavy ad binding to the next native frame to prevent scroll hitch
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Hide the auto-injected AdChoices icon to allow custom Flutter implementation
+            // We use a small view at the back of the stack to avoid blocking clicks
+            let adChoicesView = GADAdChoicesView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+            adChoicesView.isHidden = true
+            self._view.addSubview(adChoicesView)
+            self._view.adChoicesView = adChoicesView
 
-        // Robust hiding loop to catch delayed SDK injections
-        enforceHiding()
+            self._view.nativeAd = nativeAd
+            
+            // Robust hiding loop to catch delayed SDK injections
+            self.enforceHiding()
+        }
     }
 
-    private fun enforceHiding(checks: Int = 0) {
+    private func enforceHiding(checks: Int = 0) {
         // Surgical sweep: hide anything that isn't our CTA overlay
         for subview in _view.subviews {
             if subview != _ctaButton {

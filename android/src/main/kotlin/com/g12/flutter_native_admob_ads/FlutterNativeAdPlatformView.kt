@@ -42,27 +42,32 @@ class FlutterNativeAdPlatformView(
             override fun onChildViewRemoved(parent: View?, child: View?) {}
         })
 
-        // Add AdChoices first so it's behind the CTA layer if needed
-        nativeAd.adChoicesInfo?.let {
-            val adChoicesView = AdChoicesView(context)
-            adChoicesView.visibility = View.INVISIBLE
-            adChoicesView.layoutParams = FrameLayout.LayoutParams(1, 1).apply {
-                gravity = Gravity.TOP or Gravity.START
-            }
-            adView.addView(adChoicesView)
-            adView.adChoicesView = adChoicesView
-        }
-
-        adView.addView(ctaView)
-        adView.callToActionView = ctaView
-        
-        adView.setNativeAd(nativeAd)
-        
-        // Ensure the view is laid out properly to register click areas
         adView.requestLayout()
 
-        // Robust hiding loop to catch delayed SDK injections
-        enforceHiding()
+        // Defer heavy ad binding to the next native frame to prevent scroll hitch
+        adView.post {
+            adView.setNativeAd(nativeAd)
+            
+            // Add AdChoices first so it's behind the CTA layer if needed
+            nativeAd.adChoicesInfo?.let {
+                val adChoicesView = AdChoicesView(context)
+                adChoicesView.visibility = View.INVISIBLE
+                adChoicesView.layoutParams = FrameLayout.LayoutParams(1, 1).apply {
+                    gravity = Gravity.TOP or Gravity.START
+                }
+                adView.addView(adChoicesView)
+                adView.adChoicesView = adChoicesView
+            }
+
+            adView.addView(ctaView)
+            adView.callToActionView = ctaView
+            
+            // Ensure the view is laid out properly to register click areas
+            adView.requestLayout()
+            
+            // Start the robust hiding loop
+            enforceHiding()
+        }
     }
 
     private fun enforceHiding() {
