@@ -1,3 +1,10 @@
+## 1.6.0
+
+- **Ad Event Listeners**: Added support for tracking ad lifecycle events directly in Flutter.
+  - New callbacks in `loadNativeAd`: `onImpression`, `onClicked`, `onOpened`, `onClosed`.
+- **Android Stability**: Implemented sequential ad loading to ensure each ad receives its own dedicated lifecycle events.
+- **iOS Sync**: Implemented `GADNativeAdDelegate` to capture and forward identical events on iOS.
+
 ## 1.5.3
 
 - **Buttery Smooth Scrolling**: Implemented "Async Native Binding" to fix those tiny freezes when scrolling past ads. The heavy work now happens in the background, making list scrolling much smoother.

@@ -12,6 +12,10 @@ class MockFlutterNativeAdmobAdsPlatform
     required String adId,
     bool isTesting = false,
     int adsCount = 1,
+    void Function(String adId)? onImpression,
+    void Function(String adId)? onClicked,
+    void Function(String adId)? onOpened,
+    void Function(String adId)? onClosed,
   }) async => [];
 
   @override

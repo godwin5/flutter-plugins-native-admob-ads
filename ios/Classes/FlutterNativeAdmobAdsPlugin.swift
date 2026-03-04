@@ -10,6 +10,7 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_native_admob_ads", binaryMessenger: registrar.messenger())
     let instance = FlutterNativeAdmobAdsPlugin()
+    instance.channelInstance = channel
     registrar.addMethodCallDelegate(instance, channel: channel)
     
     registrar.register(
@@ -120,8 +121,45 @@ public class FlutterNativeAdmobAdsPlugin: NSObject, FlutterPlugin, GADAdLoaderDe
     adMap["adChoicesText"] = nativeAd.adChoicesInfo?.text
 
     self.nativeAds[adId] = nativeAd
+    nativeAd.delegate = self
 
     finalizeRequest(adLoader, adMap: adMap)
+  }
+
+  public func nativeAdDidRecordImpression(_ nativeAd: GADNativeAd) {
+      if let adId = findAdId(for: nativeAd) {
+          invokeOnMain("onAdImpression", arguments: adId)
+      }
+  }
+
+  public func nativeAdDidRecordClick(_ nativeAd: GADNativeAd) {
+      if let adId = findAdId(for: nativeAd) {
+          invokeOnMain("onAdClicked", arguments: adId)
+      }
+  }
+
+  public func nativeAdWillPresentScreen(_ nativeAd: GADNativeAd) {
+      if let adId = findAdId(for: nativeAd) {
+          invokeOnMain("onAdOpened", arguments: adId)
+      }
+  }
+
+  public func nativeAdDidDismissScreen(_ nativeAd: GADNativeAd) {
+      if let adId = findAdId(for: nativeAd) {
+          invokeOnMain("onAdClosed", arguments: adId)
+      }
+  }
+
+  private func findAdId(for nativeAd: GADNativeAd) -> String? {
+      return nativeAds.first(where: { $0.value === nativeAd })?.key
+  }
+
+  private var channelInstance: FlutterMethodChannel?
+
+  private func invokeOnMain(_ method: String, arguments: Any?) {
+      DispatchQueue.main.async {
+          self.channelInstance?.invokeMethod(method, arguments: arguments)
+      }
   }
 
   private func finalizeRequest(_ adLoader: GADAdLoader, adMap: [String: Any?]?) {

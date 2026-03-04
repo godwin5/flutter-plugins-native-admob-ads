@@ -19,15 +19,27 @@ class FlutterNativeAdmobAds {
   /// [adId] is your AdMob Native Ad unit ID.
   /// [isTesting] if true, uses the Google test ad unit ID.
   /// [adsCount] the number of ads to request (max 5).
+  /// [onImpression] called when an impression is recorded.
+  /// [onClicked] called when the ad is clicked.
+  /// [onOpened] called when the ad opens a full-screen content.
+  /// [onClosed] called when the ad is closed.
   Future<List<FlutterNativeAd>> loadNativeAd({
     required String adId,
     bool isTesting = false,
     int adsCount = 1,
+    void Function(String adId)? onImpression,
+    void Function(String adId)? onClicked,
+    void Function(String adId)? onOpened,
+    void Function(String adId)? onClosed,
   }) {
     return FlutterNativeAdmobAdsPlatform.instance.loadNativeAd(
       adId: adId,
       isTesting: isTesting,
       adsCount: adsCount,
+      onImpression: onImpression,
+      onClicked: onClicked,
+      onOpened: onOpened,
+      onClosed: onClosed,
     );
   }
 

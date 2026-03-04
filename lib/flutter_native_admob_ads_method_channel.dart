@@ -10,11 +10,44 @@ class MethodChannelFlutterNativeAdmobAds extends FlutterNativeAdmobAdsPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('flutter_native_admob_ads');
 
+  final Map<String, List<Function(String)>> _adCallbacks = {};
+
+  MethodChannelFlutterNativeAdmobAds() {
+    methodChannel.setMethodCallHandler(_handleMethodCall);
+  }
+
+  Future<void> _handleMethodCall(MethodCall call) async {
+    final String? adId = call.arguments as String?;
+    if (adId == null) return;
+
+    final callbacks = _adCallbacks[adId];
+    if (callbacks == null) return;
+
+    switch (call.method) {
+      case 'onAdImpression':
+        callbacks[0](adId);
+        break;
+      case 'onAdClicked':
+        callbacks[1](adId);
+        break;
+      case 'onAdOpened':
+        callbacks[2](adId);
+        break;
+      case 'onAdClosed':
+        callbacks[3](adId);
+        break;
+    }
+  }
+
   @override
   Future<List<FlutterNativeAd>> loadNativeAd({
     required String adId,
     bool isTesting = false,
     int adsCount = 1,
+    void Function(String adId)? onImpression,
+    void Function(String adId)? onClicked,
+    void Function(String adId)? onOpened,
+    void Function(String adId)? onClosed,
   }) async {
     final List<dynamic>? result = await methodChannel.invokeMethod<List<dynamic>>('loadNativeAd', {
       'adId': adId,
@@ -24,11 +57,23 @@ class MethodChannelFlutterNativeAdmobAds extends FlutterNativeAdmobAdsPlatform {
 
     if (result == null) return [];
 
-    return result.map((e) => FlutterNativeAd.fromMap(Map<String, dynamic>.from(e as Map))).toList();
+    final ads = result.map((e) => FlutterNativeAd.fromMap(Map<String, dynamic>.from(e as Map))).toList();
+
+    for (var ad in ads) {
+      _adCallbacks[ad.id] = [
+        onImpression ?? (_) {},
+        onClicked ?? (_) {},
+        onOpened ?? (_) {},
+        onClosed ?? (_) {},
+      ];
+    }
+
+    return ads;
   }
 
   @override
   Future<void> disposeNativeAd(String id) async {
+    _adCallbacks.remove(id);
     await methodChannel.invokeMethod('disposeNativeAd', {'id': id});
   }
 }

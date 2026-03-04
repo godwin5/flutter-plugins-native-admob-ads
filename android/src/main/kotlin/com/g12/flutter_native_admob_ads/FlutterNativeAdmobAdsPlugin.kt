@@ -23,7 +23,6 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.util.*
 import kotlin.collections.HashMap
-import android.widget.Toast
 
 /** FlutterNativeAdmobAdsPlugin */
 class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -73,56 +72,77 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
 
         val adsCount = call.argument<Int>("adsCount") ?: 1
         val adsToReturn = Collections.synchronizedList(mutableListOf<Map<String, Any?>>())
-        var loadedCount = 0
-        var failedCount = 0
+        
+        loadAdsSequentially(adId, adsCount, adsToReturn, result)
+    }
+
+    private fun loadAdsSequentially(
+        adId: String, 
+        remainingCount: Int, 
+        loadedAds: MutableList<Map<String, Any?>>, 
+        result: Result
+    ) {
+        if (remainingCount <= 0) {
+            activity?.runOnUiThread {
+                if (loadedAds.isNotEmpty()) {
+                    result.success(loadedAds)
+                } else {
+                    result.error("LOAD_FAILED", "No ads loaded", null)
+                }
+            }
+            return
+        }
 
         val adLoader = AdLoader.Builder(context!!, adId)
             .forNativeAd { nativeAd ->
                 val adMap = mapNativeAd(nativeAd)
-                adsToReturn.add(adMap)
-                loadedCount++
+                loadedAds.add(adMap)
                 
-                checkCompletion(loadedCount, failedCount, adsCount, adsToReturn, result)
+                // Trigger next load
+                loadAdsSequentially(adId, remainingCount - 1, loadedAds, result)
             }
             .withAdListener(object : AdListener() {
+                var currentAdId: String? = null
+
+                private fun ensureAdId(): String? {
+                    if (currentAdId == null && loadedAds.isNotEmpty()) {
+                        currentAdId = loadedAds.last()["id"] as String?
+                    }
+                    return currentAdId
+                }
+
                 override fun onAdFailedToLoad(adError: LoadAdError) {
-                    failedCount++
-                    checkCompletion(loadedCount, failedCount, adsCount, adsToReturn, result)
-                    Toast.makeText(context, "Ad failed", Toast.LENGTH_SHORT).show()
+                    loadAdsSequentially(adId, remainingCount - 1, loadedAds, result)
                 }
 
                 override fun onAdOpened() {
-                    Toast.makeText(context, "Ad opened", Toast.LENGTH_SHORT).show()
+                    ensureAdId()?.let { id ->
+                        channel.invokeMethod("onAdOpened", id)
+                    }
                 }
 
                 override fun onAdClicked() {
-                    Toast.makeText(context, "Ad clicked", Toast.LENGTH_SHORT).show()
+                    ensureAdId()?.let { id ->
+                        channel.invokeMethod("onAdClicked", id)
+                    }
                 }
 
                 override fun onAdClosed() {
-                    Toast.makeText(context, "Ad closed", Toast.LENGTH_SHORT).show()
+                    ensureAdId()?.let { id ->
+                        channel.invokeMethod("onAdClosed", id)
+                    }
                 }
 
                 override fun onAdImpression() {
-                    Toast.makeText(context, "Ad impression", Toast.LENGTH_SHORT).show()
+                    ensureAdId()?.let { id ->
+                        channel.invokeMethod("onAdImpression", id)
+                    }
                 }
             })
             .withNativeAdOptions(NativeAdOptions.Builder().build())
             .build()
 
-        adLoader.loadAds(AdRequest.Builder().build(), adsCount)
-    }
-
-    private fun checkCompletion(loaded: Int, failed: Int, total: Int, ads: List<Map<String, Any?>>, result: Result) {
-        if (loaded + failed == total) {
-            activity?.runOnUiThread {
-                if (loaded > 0) {
-                    result.success(ads)
-                } else {
-                    result.error("LOAD_FAILED", "No ads loaded", null)
-                }
-            }
-        }
+        adLoader.loadAd(AdRequest.Builder().build())
     }
 
     private fun mapNativeAd(nativeAd: NativeAd): Map<String, Any?> {
