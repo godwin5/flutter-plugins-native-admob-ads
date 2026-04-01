@@ -161,13 +161,12 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         contentUrl?.let { builder.setContentUrl(it) }
 
         val neighboringContentUrls = map["neighboringContentUrls"] as? List<String>
-        neighboringContentUrls?.let { builder.setNeighboringContentUrls(it.toSet()) }
+        neighboringContentUrls?.let { builder.setNeighboringContentUrls(it) }
 
         val httpTimeoutMillis = map["httpTimeoutMillis"] as? Int
         httpTimeoutMillis?.let { builder.setHttpTimeoutMillis(it) }
 
-        val mediationExtrasIdentifier = map["mediationExtrasIdentifier"] as? String
-        mediationExtrasIdentifier?.let { builder.setMediationExtrasIdentifier(it) }
+        // mediationExtrasIdentifier is not supported by AdRequest.Builder
 
         // Extras and Non-personalized ads
         val extras = Bundle()
@@ -190,9 +189,7 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
             val innerExtras = extraMap["extras"] as? Map<String, Any?>
             if (adapterClassName != null && innerExtras != null) {
                 try {
-                    val adapterClass = Class.forName(adapterClassName) as Class<out com.google.android.gms.ads.mediation.NetworkExtras>
-                    // Note: Modern AdMob uses Bundles for almost everything via addNetworkExtrasBundle(Class<? extends MediationExtrasAdapter>, Bundle)
-                    // If the adapter implements MediationExtrasAdapter, we should use a Bundle.
+                    // Use addNetworkExtrasBundle(Class<? extends MediationExtrasReceiver>, Bundle)
                     val bundle = Bundle()
                     innerExtras.forEach { (k, v) ->
                         when (v) {
@@ -202,8 +199,8 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
                             is Double -> bundle.putDouble(k, v)
                         }
                     }
-                    // For now, we assume standard MediationExtras (Bundles)
-                    builder.addNetworkExtrasBundle(adapterClass as Class<out com.google.android.gms.ads.mediation.MediationExtrasReceiver>, bundle)
+                    val receiverClass = Class.forName(adapterClassName) as Class<out com.google.android.gms.ads.mediation.MediationExtrasReceiver>
+                    builder.addNetworkExtrasBundle(receiverClass, bundle)
                 } catch (e: Exception) {
                     // Ignore or log error
                 }

@@ -1,3 +1,7 @@
+## 1.8.1
+
+- **Android Fix**: Resolved Kotlin compilation errors where `neighboringContentUrls` expected a List and `setMediationExtrasIdentifier` was missing from the AdMob SDK.
+
 ## 1.8.0
 
 - **Breaking Change**: Renamed models to avoid clashes with `google_mobile_ads` (GMA) plugin.

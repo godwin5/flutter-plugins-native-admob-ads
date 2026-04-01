@@ -16,7 +16,7 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_native_admob_ads: ^1.8.0
+  flutter_native_admob_ads: ^1.8.1
 ```
 
 ## Platform Setup
