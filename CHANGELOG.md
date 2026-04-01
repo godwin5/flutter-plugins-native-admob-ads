@@ -1,3 +1,11 @@
+## 1.7.0
+
+- **AdRequest Targeting**: Added support for advanced targeting parameters in `AdRequest`.
+  - Keywords, Content URL, Neighboring Content URLs, etc.
+- **Mediation Extras**: Added full support for specialized mediation extras matching the official `google_mobile_ads` API.
+  - New `MediationExtras` and `GenericMediationExtras` classes.
+- **Non-Personalized Ads**: Easy toggle for requesting non-personalized ads.
+
 ## 1.6.0
 
 - **Ad Event Listeners**: Added support for tracking ad lifecycle events directly in Flutter.

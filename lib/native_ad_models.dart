@@ -151,3 +151,98 @@ class FlutterNativeAdOptions {
     return {'adId': adId, 'isTesting': isTesting, 'adsCount': adsCount};
   }
 }
+
+/// Represents an AdRequest with various targeting and configuration options.
+class AdRequest {
+  /// A list of keywords to be used for targeting.
+  final List<String>? keywords;
+
+  /// The content URL for the ad request.
+  final String? contentUrl;
+
+  /// A list of neighboring content URLs for the ad request.
+  final List<String>? neighboringContentUrls;
+
+  /// Whether non-personalized ads should be requested.
+  final bool? nonPersonalizedAds;
+
+  /// The HTTP timeout in milliseconds.
+  final int? httpTimeoutMillis;
+
+  /// An identifier for mediation extras.
+  final String? mediationExtrasIdentifier;
+
+  /// A map of extra parameters.
+  final Map<String, String>? extras;
+
+  /// A list of mediation extras.
+  final List<MediationExtras>? mediationExtras;
+
+  const AdRequest({
+    this.keywords,
+    this.contentUrl,
+    this.neighboringContentUrls,
+    this.nonPersonalizedAds,
+    this.httpTimeoutMillis,
+    this.mediationExtrasIdentifier,
+    this.extras,
+    this.mediationExtras,
+  });
+
+  /// Converts the AdRequest into a Map for transmission over the method channel.
+  Map<String, dynamic> toMap() {
+    return {
+      'keywords': keywords,
+      'contentUrl': contentUrl,
+      'neighboringContentUrls': neighboringContentUrls,
+      'nonPersonalizedAds': nonPersonalizedAds,
+      'httpTimeoutMillis': httpTimeoutMillis,
+      'mediationExtrasIdentifier': mediationExtrasIdentifier,
+      'extras': extras,
+      'mediationExtras': mediationExtras?.map((e) => e.toMap()).toList(),
+    };
+  }
+}
+
+/// Contains information for a particular ad network set by the developer.
+abstract class MediationExtras {
+  /// Fully-qualified name of an Android MediationExtras class.
+  String getAndroidClassName();
+
+  /// Name of an iOS class that conforms to the GADAdNetworkExtras protocol.
+  String getIOSClassName();
+
+  /// Key-Value pair to be sent to the host platform to parse.
+  Map<String, dynamic> getExtras();
+
+  /// Converts the extras into a Map for transmission over the method channel.
+  Map<String, dynamic> toMap() {
+    return {
+      'androidClassName': getAndroidClassName(),
+      'iosClassName': getIOSClassName(),
+      'extras': getExtras(),
+    };
+  }
+}
+
+/// A generic implementation of [MediationExtras] to support any mediation provider.
+class GenericMediationExtras extends MediationExtras {
+  final String androidClassName;
+  final String iosClassName;
+  final Map<String, dynamic> extras;
+
+  GenericMediationExtras({
+    required this.androidClassName,
+    required this.iosClassName,
+    required this.extras,
+  });
+
+  @override
+  String getAndroidClassName() => androidClassName;
+
+  @override
+  String getIOSClassName() => iosClassName;
+
+  @override
+  Map<String, dynamic> getExtras() => extras;
+}

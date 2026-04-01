@@ -44,16 +44,20 @@ class MethodChannelFlutterNativeAdmobAds extends FlutterNativeAdmobAdsPlatform {
     required String adId,
     bool isTesting = false,
     int adsCount = 1,
+    AdRequest? adRequest,
     void Function(String adId)? onImpression,
     void Function(String adId)? onClicked,
     void Function(String adId)? onOpened,
     void Function(String adId)? onClosed,
   }) async {
-    final List<dynamic>? result = await methodChannel.invokeMethod<List<dynamic>>('loadNativeAd', {
+    final Map<String, dynamic> arguments = {
       'adId': adId,
       'isTesting': isTesting,
       'adsCount': adsCount,
-    });
+      'adRequest': adRequest?.toMap(),
+    };
+
+    final List<dynamic>? result = await methodChannel.invokeMethod<List<dynamic>>('loadNativeAd', arguments);
 
     if (result == null) return [];
 

@@ -14,6 +14,8 @@ import com.google.android.gms.ads.*
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
+import android.os.Bundle
+import com.google.ads.mediation.admob.AdMobAdapter
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -71,15 +73,17 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
         }
 
         val adsCount = call.argument<Int>("adsCount") ?: 1
+        val adRequestMap = call.argument<Map<String, Any?>>("adRequest")
         val adsToReturn = Collections.synchronizedList(mutableListOf<Map<String, Any?>>())
         
-        loadAdsSequentially(adId, adsCount, adsToReturn, result)
+        loadAdsSequentially(adId, adsCount, adsToReturn, adRequestMap, result)
     }
 
     private fun loadAdsSequentially(
         adId: String, 
         remainingCount: Int, 
         loadedAds: MutableList<Map<String, Any?>>, 
+        adRequestMap: Map<String, Any?>?,
         result: Result
     ) {
         if (remainingCount <= 0) {
@@ -99,7 +103,7 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
                 loadedAds.add(adMap)
                 
                 // Trigger next load
-                loadAdsSequentially(adId, remainingCount - 1, loadedAds, result)
+                loadAdsSequentially(adId, remainingCount - 1, loadedAds, adRequestMap, result)
             }
             .withAdListener(object : AdListener() {
                 var currentAdId: String? = null
@@ -112,7 +116,7 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
                 }
 
                 override fun onAdFailedToLoad(adError: LoadAdError) {
-                    loadAdsSequentially(adId, remainingCount - 1, loadedAds, result)
+                    loadAdsSequentially(adId, remainingCount - 1, loadedAds, adRequestMap, result)
                 }
 
                 override fun onAdOpened() {
@@ -142,7 +146,71 @@ class FlutterNativeAdmobAdsPlugin : FlutterPlugin, MethodCallHandler, ActivityAw
             .withNativeAdOptions(NativeAdOptions.Builder().build())
             .build()
 
-        adLoader.loadAd(AdRequest.Builder().build())
+        val adRequest = buildAdRequest(adRequestMap)
+        adLoader.loadAd(adRequest)
+    }
+
+    private fun buildAdRequest(map: Map<String, Any?>?): AdRequest {
+        val builder = AdRequest.Builder()
+        if (map == null) return builder.build()
+
+        val keywords = map["keywords"] as? List<String>
+        keywords?.forEach { builder.addKeyword(it) }
+
+        val contentUrl = map["contentUrl"] as? String
+        contentUrl?.let { builder.setContentUrl(it) }
+
+        val neighboringContentUrls = map["neighboringContentUrls"] as? List<String>
+        neighboringContentUrls?.let { builder.setNeighboringContentUrls(it.toSet()) }
+
+        val httpTimeoutMillis = map["httpTimeoutMillis"] as? Int
+        httpTimeoutMillis?.let { builder.setHttpTimeoutMillis(it) }
+
+        val mediationExtrasIdentifier = map["mediationExtrasIdentifier"] as? String
+        mediationExtrasIdentifier?.let { builder.setMediationExtrasIdentifier(it) }
+
+        // Extras and Non-personalized ads
+        val extras = Bundle()
+        val customExtras = map["extras"] as? Map<String, String>
+        customExtras?.forEach { (key, value) -> extras.putString(key, value) }
+
+        val nonPersonalizedAds = map["nonPersonalizedAds"] as? Boolean
+        if (nonPersonalizedAds == true) {
+            extras.putString("npa", "1")
+        }
+
+        if (!extras.isEmpty) {
+            builder.addNetworkExtrasBundle(AdMobAdapter::class.java, extras)
+        }
+
+        // Other Mediation Extras
+        val mediationExtrasList = map["mediationExtras"] as? List<Map<String, Any?>>
+        mediationExtrasList?.forEach { extraMap ->
+            val adapterClassName = extraMap["androidClassName"] as? String
+            val innerExtras = extraMap["extras"] as? Map<String, Any?>
+            if (adapterClassName != null && innerExtras != null) {
+                try {
+                    val adapterClass = Class.forName(adapterClassName) as Class<out com.google.android.gms.ads.mediation.NetworkExtras>
+                    // Note: Modern AdMob uses Bundles for almost everything via addNetworkExtrasBundle(Class<? extends MediationExtrasAdapter>, Bundle)
+                    // If the adapter implements MediationExtrasAdapter, we should use a Bundle.
+                    val bundle = Bundle()
+                    innerExtras.forEach { (k, v) ->
+                        when (v) {
+                            is String -> bundle.putString(k, v)
+                            is Int -> bundle.putInt(k, v)
+                            is Boolean -> bundle.putBoolean(k, v)
+                            is Double -> bundle.putDouble(k, v)
+                        }
+                    }
+                    // For now, we assume standard MediationExtras (Bundles)
+                    builder.addNetworkExtrasBundle(adapterClass as Class<out com.google.android.gms.ads.mediation.MediationExtrasReceiver>, bundle)
+                } catch (e: Exception) {
+                    // Ignore or log error
+                }
+            }
+        }
+
+        return builder.build()
     }
 
     private fun mapNativeAd(nativeAd: NativeAd): Map<String, Any?> {
