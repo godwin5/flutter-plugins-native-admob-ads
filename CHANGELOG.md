@@ -1,3 +1,10 @@
+## 1.8.0
+
+- **Breaking Change**: Renamed models to avoid clashes with `google_mobile_ads` (GMA) plugin.
+  - `AdRequest` -> `NativeAdRequest`
+  - `MediationExtras` -> `NativeAdMediationExtras`
+  - `GenericMediationExtras` -> `NativeAdGenericMediationExtras`
+
 ## 1.7.0
 
 - **AdRequest Targeting**: Added support for advanced targeting parameters in `AdRequest`.

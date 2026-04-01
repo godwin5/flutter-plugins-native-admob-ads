@@ -46,7 +46,7 @@ class _NativeAdDemoState extends State<NativeAdDemo> {
         adId: 'ca-app-pub-3940256099942544/2247696110', // Test ID
         isTesting: true,
         adsCount: 1,
-        adRequest: const AdRequest(
+        adRequest: const NativeAdRequest(
           keywords: ['flutter', 'admob', 'native ads'],
           contentUrl: 'https://github.com/godwin5/flutter-plugins-native-admob-ads',
         ),

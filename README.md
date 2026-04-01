@@ -16,7 +16,7 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_native_admob_ads: ^1.7.0
+  flutter_native_admob_ads: ^1.8.0
 ```
 
 ## Platform Setup
@@ -44,7 +44,7 @@ Add your AdMob App ID to `ios/Runner/Info.plist`:
 
 ### 1. Load an Ad with Targeting
 
-You can now pass an `AdRequest` object to provide targeting information like keywords and content URLs.
+You can now pass a `NativeAdRequest` object to provide targeting information like keywords and content URLs.
 
 ```dart
 import 'package:flutter_native_admob_ads/flutter_native_admob_ads.dart';
@@ -56,7 +56,7 @@ final ads = await _plugin.loadNativeAd(
   adId: 'ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy',
   isTesting: true,
   adsCount: 1,
-  adRequest: AdRequest(
+  adRequest: NativeAdRequest(
     keywords: ['flutter', 'admob', 'native ads'],
     contentUrl: 'https://mysite.com/page-content',
     nonPersonalizedAds: true, // Request non-personalized ads
@@ -70,12 +70,12 @@ if (ads.isNotEmpty) {
 
 ### 2. Mediation Extras
 
-Support for mediation-specific extras is included using an API similar to the official `google_mobile_ads` plugin.
+Support for mediation-specific extras is included using an API similar to the official `google_mobile_ads` plugin. Use `NativeAdMediationExtras` and `NativeAdGenericMediationExtras`.
 
 ```dart
-final adRequest = AdRequest(
+final adRequest = NativeAdRequest(
   mediationExtras: [
-    GenericMediationExtras(
+    NativeAdGenericMediationExtras(
       androidClassName: 'com.google.ads.mediation.admob.AdMobAdapter',
       iosClassName: 'GADExtras',
       extras: {'npa': '1'},

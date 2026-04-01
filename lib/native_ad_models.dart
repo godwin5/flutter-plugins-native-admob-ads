@@ -152,8 +152,8 @@ class FlutterNativeAdOptions {
   }
 }
 
-/// Represents an AdRequest with various targeting and configuration options.
-class AdRequest {
+/// Represents an NativeAdRequest with various targeting and configuration options.
+class NativeAdRequest {
   /// A list of keywords to be used for targeting.
   final List<String>? keywords;
 
@@ -176,9 +176,9 @@ class AdRequest {
   final Map<String, String>? extras;
 
   /// A list of mediation extras.
-  final List<MediationExtras>? mediationExtras;
+  final List<NativeAdMediationExtras>? mediationExtras;
 
-  const AdRequest({
+  const NativeAdRequest({
     this.keywords,
     this.contentUrl,
     this.neighboringContentUrls,
@@ -189,7 +189,7 @@ class AdRequest {
     this.mediationExtras,
   });
 
-  /// Converts the AdRequest into a Map for transmission over the method channel.
+  /// Converts the NativeAdRequest into a Map for transmission over the method channel.
   Map<String, dynamic> toMap() {
     return {
       'keywords': keywords,
@@ -205,7 +205,7 @@ class AdRequest {
 }
 
 /// Contains information for a particular ad network set by the developer.
-abstract class MediationExtras {
+abstract class NativeAdMediationExtras {
   /// Fully-qualified name of an Android MediationExtras class.
   String getAndroidClassName();
 
@@ -225,13 +225,13 @@ abstract class MediationExtras {
   }
 }
 
-/// A generic implementation of [MediationExtras] to support any mediation provider.
-class GenericMediationExtras extends MediationExtras {
+/// A generic implementation of [NativeAdMediationExtras] to support any mediation provider.
+class NativeAdGenericMediationExtras extends NativeAdMediationExtras {
   final String androidClassName;
   final String iosClassName;
   final Map<String, dynamic> extras;
 
-  GenericMediationExtras({
+  NativeAdGenericMediationExtras({
     required this.androidClassName,
     required this.iosClassName,
     required this.extras,
